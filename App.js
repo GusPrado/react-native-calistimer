@@ -20,7 +20,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator headerMode={'none'} initialRouteName={'EMOM'}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="EMOM" component={EMOMScreen} />
       </Stack.Navigator>
