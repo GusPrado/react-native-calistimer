@@ -2,20 +2,31 @@
  * Sample React Native App
  * https://github.com/facebook/react-native
  *
- * @format
- * @flow
+ * format
+ * flow
  */
 
+import 'react-native-gesture-handler';
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {StyleSheet} from 'react-native';
 
-const App: () => React$Node = () => {
+import HomeScreen from './src/screens/HomeScreen';
+import EMOMScreen from './src/screens/EMOMScreen';
+
+const Stack = createStackNavigator();
+
+export default function App() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcome}>CalisTimer</Text>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="EMOM" component={EMOMScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -30,5 +41,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu-Bold',
   },
 });
-
-export default App;
