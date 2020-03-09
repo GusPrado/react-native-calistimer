@@ -11,12 +11,26 @@ const Time = props => {
     return num;
   };
   return (
-    <Text>
+    <Text style={styles[props.type ? props.type : 'text']}>
       {format(minutes)}:{format(seconds)}
+      {props.appendedText}
     </Text>
   );
 };
 
-const styles = StyleSheet.create();
+const styles = StyleSheet.create({
+  text: {
+    fontFamily: 'Ubuntu-Bold',
+    fontSize: 96,
+    color: 'white',
+    textAlign: 'center',
+  },
+  text2: {
+    fontFamily: 'Ubuntu-Regular',
+    fontSize: 24,
+    color: 'white',
+    textAlign: 'center',
+  },
+});
 
 export default Time;

@@ -10,23 +10,31 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
+import Sound from 'react-native-sound';
 
 import Title from '../components/Title';
 import Select from '../components/Select';
 import Time from '../components/Time';
+import ProgressBar from '../components/ProgressBar';
+import BgProgress from '../components/BgProgress';
+
+const alert = require('../../assets/sounds/alert.wav');
 
 class EMOMScreen extends Component {
   state = {
     kbVisible: false,
     alerts: 0,
     countdown: 0,
-    time: '15',
+    time: '2',
     isRunning: false,
-    countdownValue: 5,
+    countdownValue: 0,
     count: 0,
   };
 
   componentDidMount() {
+    Sound.setCategory('Playback', true);
+    this.alert = new Sound(alert);
+
     this.kbShow = Keyboard.addListener('keyboardDidShow', () => {
       this.setState({kbVisible: true});
     });
@@ -41,10 +49,23 @@ class EMOMScreen extends Component {
     this.kbHide.remove();
   }
 
+  stop = () => {
+    clearInterval(this.countdownTimer);
+    clearInterval(this.countTimer);
+    this.setState({isRunning: false});
+  };
+
   play = () => {
+    this.setState({
+      count: 0,
+      countdownValue: this.state.countdown === 1 ? 5 : 0,
+    });
     this.setState({isRunning: true});
     const count = () => {
       this.setState({count: this.state.count + 1}, () => {
+        if (this.state.count % this.setState.alert === 0) {
+          this.alert.play();
+        }
         if (this.state.count === parseInt(this.state.time) * 60) {
           clearInterval(this.countTimer);
         }
@@ -52,29 +73,60 @@ class EMOMScreen extends Component {
     };
     //check countdown
     if (this.state.countdown === 1) {
+      this.alert.play();
       this.countdownTimer = setInterval(() => {
+        this.alert.play();
         this.setState({countdownValue: this.state.countdownValue - 1}, () => {
           if (this.state.countdownValue === 0) {
             clearInterval(this.countdownTimer);
-            this.countTimer = setInterval(count, 1000);
+            this.countTimer = setInterval(count, 100);
           }
         });
       }, 1000);
     } else {
-      this.countTimer = setInterval(count, 1000);
+      this.countTimer = setInterval(count, 100);
     }
   };
 
   render() {
     if (this.state.isRunning) {
-      const percMinute = (this.state.count % 60) / 60;
-      const percTime = this.state.count / 60 / parseInt(this.state.time);
+      const percMinute = parseInt(((this.state.count % 60) / 60) * 100);
+      const percTime = parseInt(
+        (this.state.count / 60 / parseInt(this.state.time)) * 100,
+      );
       return (
-        <View style={[styles.container, {justifyContent: 'center'}]}>
-          <Text>Countdown: {this.state.countdownValue}</Text>
-          <Text>Count: {this.state.count}</Text>
-          <Time time={this.state.count} />
-        </View>
+        <BgProgress percentage={percMinute}>
+          <View style={[{flex: 1, justifyContent: 'center'}]}>
+            <View style={{flex: 1}}>
+              <Title
+                title={'EMOM'}
+                subTitle={'Every Minute On the Minute'}
+                style={{paddingTop: this.state.kbVisible ? 50 : 100}}
+              />
+            </View>
+            <View style={{flex: 1, justifyContent: 'center'}}>
+              <Time time={this.state.count} />
+              <ProgressBar percentage={percTime} />
+              <Time
+                time={parseInt(this.state.time) * 60 - this.state.count}
+                type="text2"
+                appendedText={' restantes'}
+              />
+            </View>
+            <View style={{flex: 1, justifyContent: 'flex-end'}}>
+              {this.state.countdownValue > 0 ? (
+                <Text style={styles.countdown}>
+                  {this.state.countdownValue}
+                </Text>
+              ) : null}
+              <TouchableOpacity
+                style={{alignSelf: 'center', marginBottom: 40}}
+                onPress={this.stop}>
+                <Image source={require('../../assets/img/stop.png')} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </BgProgress>
       );
     }
 
@@ -163,6 +215,12 @@ const styles = StyleSheet.create({
     color: 'black',
     fontFamily: 'Ubuntu-Regular',
     fontSize: 48,
+  },
+  countdown: {
+    fontFamily: 'Ubuntu-Bold',
+    fontSize: 144,
+    color: 'white',
+    textAlign: 'center',
   },
 });
 
